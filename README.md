@@ -3,7 +3,7 @@ A simple privilege escalation rootkit.
 
 ## Interaction with rootkit
 Send signal **63** to any pid (kill -63 0) for hidding/showing the kernel module.    
-Send signal **64** to any pid for getting (kill -64 0) root
+Send signal **64** to any pid (kill -64 0) for getting root.
 
 ## Loading and removing the module
 Loading -> ```insmod deadroot.ko```    
