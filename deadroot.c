@@ -111,7 +111,6 @@ static int __init deadroot_init(void){
 	// Building kallsyms_lookup_name since it has been removed from > 5.7 kernel
 	register_kprobe(&kp);
 	kallsyms_lookup_name_t kallsyms_lookup_name;
-	register_kprobe(&kp);
 	kallsyms_lookup_name = (kallsyms_lookup_name_t) kp.addr;
 	unregister_kprobe(&kp);
 	
